@@ -10,8 +10,11 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy)
 
-find_package(Eigen3 REQUIRED)
 
+find_package(Eigen 3 QUIET) 
+if(NOT Eigen_FOUND)
+	include(cmake/FindEigen3.cmake)
+endif() 
 
 catkin_package(
   INCLUDE_DIRS include
