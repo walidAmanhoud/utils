@@ -4,6 +4,7 @@
 #include "ros/ros.h"
 #include "Eigen/Eigen"
 
+template<typename T = float>
 class Utils 
 {
 	public:
@@ -11,24 +12,23 @@ class Utils
 		// Class constructor
 		Utils();
 
-    static Eigen::Vector4f quaternionProduct(Eigen::Vector4f q1, Eigen::Vector4f q2);
+    static Eigen::Matrix<T,4,1> quaternionProduct(Eigen::Matrix<T,4,1> q1, Eigen::Matrix<T,4,1> q2);
 
-    static Eigen::Matrix3f getSkewSymmetricMatrix(Eigen::Vector3f input);
+    static Eigen::Matrix<T,3,3> getSkewSymmetricMatrix(Eigen::Matrix<T,3,1> input);
 
-    static Eigen::Vector4f rotationMatrixToQuaternion(Eigen::Matrix3f R);
+    static Eigen::Matrix<T,4,1> rotationMatrixToQuaternion(Eigen::Matrix<T,3,3> R);
 
-  	static Eigen::Matrix3f quaternionToRotationMatrix(Eigen::Vector4f q);
+  	static Eigen::Matrix<T,3,3> quaternionToRotationMatrix(Eigen::Matrix<T,4,1> q);
 
-		static void quaternionToAxisAngle(Eigen::Vector4f q, Eigen::Vector3f &axis, float &angle);
+		static void quaternionToAxisAngle(Eigen::Matrix<T,4,1> q, Eigen::Matrix<T,3,1> &axis, T &angle);
 
-  	static Eigen::Vector4f slerpQuaternion(Eigen::Vector4f q1, Eigen::Vector4f q2, float t);
+  	static Eigen::Matrix<T,4,1> slerpQuaternion(Eigen::Matrix<T,4,1> q1, Eigen::Matrix<T,4,1> q2, T t);
 
-  	static float smoothRise(float x, float a, float b);
+  	static T smoothRise(T x, T a, T b);
 
-		static float smoothFall(float x, float a, float b);
+		static T smoothFall(T x, T a, T b);
 
-		static float smoothRiseFall(float x, float a, float b, float c, float d);
+		static T smoothRiseFall(T x, T a, T b, T c, T d);
 };
-
 
 #endif

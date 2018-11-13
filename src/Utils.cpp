@@ -1,26 +1,29 @@
 #include "Utils.h"
 
-
-Utils::Utils()
+template<typename T>
+Utils<T>::Utils()
 {
 
 }
 
-Eigen::Vector4f Utils::quaternionProduct(Eigen::Vector4f q1, Eigen::Vector4f q2)
+
+template<typename T>
+Eigen::Matrix<T,4,1> Utils<T>::quaternionProduct(Eigen::Matrix<T,4,1> q1, Eigen::Matrix<T,4,1> q2)
 {
-  Eigen::Vector4f q;
+  Eigen::Matrix<T,4,1> q;
   q(0) = q1(0)*q2(0)-(q1.segment(1,3)).dot(q2.segment(1,3));
-  Eigen::Vector3f q1Im = (q1.segment(1,3));
-  Eigen::Vector3f q2Im = (q2.segment(1,3));
+  Eigen::Matrix<T,3,1> q1Im = (q1.segment(1,3));
+  Eigen::Matrix<T,3,1> q2Im = (q2.segment(1,3));
   q.segment(1,3) = q1(0)*q2Im+q2(0)*q1Im+q1Im.cross(q2Im);
 
   return q;
 }
 
 
-Eigen::Matrix3f Utils::getSkewSymmetricMatrix(Eigen::Vector3f input)
+template<typename T>
+Eigen::Matrix<T,3,3> Utils<T>::getSkewSymmetricMatrix(Eigen::Matrix<T,3,1> input)
 {
-  Eigen::Matrix3f output;
+  Eigen::Matrix<T,3,3> output;
 
   output << 0.0f, -input(2), input(1),
             input(2), 0.0f, -input(0),
@@ -30,9 +33,10 @@ Eigen::Matrix3f Utils::getSkewSymmetricMatrix(Eigen::Vector3f input)
 }
 
 
-Eigen::Vector4f Utils::rotationMatrixToQuaternion(Eigen::Matrix3f R)
+template<typename T>
+Eigen::Matrix<T,4,1> Utils<T>::rotationMatrixToQuaternion(Eigen::Matrix<T,3,3> R)
 {
-  Eigen::Vector4f q;
+  Eigen::Matrix<T,4,1> q;
 
   float r11 = R(0,0);
   float r12 = R(0,1);
@@ -82,14 +86,15 @@ Eigen::Vector4f Utils::rotationMatrixToQuaternion(Eigen::Matrix3f R)
 }
 
 
-Eigen::Matrix3f Utils::quaternionToRotationMatrix(Eigen::Vector4f q)
+template<typename T>
+Eigen::Matrix<T,3,3> Utils<T>::quaternionToRotationMatrix(Eigen::Matrix<T,4,1> q)
 {
-  Eigen::Matrix3f R;
+  Eigen::Matrix<T,3,3> R;
 
-  float q0 = q(0);
-  float q1 = q(1);
-  float q2 = q(2);
-  float q3 = q(3);
+  T q0 = q(0);
+  T q1 = q(1);
+  T q2 = q(2);
+  T q3 = q(3);
 
   R(0,0) = q0*q0+q1*q1-q2*q2-q3*q3;
   R(1,0) = 2.0f*(q1*q2+q0*q3);
@@ -107,7 +112,8 @@ Eigen::Matrix3f Utils::quaternionToRotationMatrix(Eigen::Vector4f q)
 }
 
 
-void Utils::quaternionToAxisAngle(Eigen::Vector4f q, Eigen::Vector3f &axis, float &angle)
+template<typename T>
+void Utils<T>::quaternionToAxisAngle(Eigen::Matrix<T,4,1> q, Eigen::Matrix<T,3,1> &axis, T &angle)
 {
   if((q.segment(1,3)).norm() < 1e-3f)
   {
@@ -123,10 +129,11 @@ void Utils::quaternionToAxisAngle(Eigen::Vector4f q, Eigen::Vector3f &axis, floa
 }
 
 
-Eigen::Vector4f Utils::slerpQuaternion(Eigen::Vector4f q1, Eigen::Vector4f q2, float t)
+template<typename T>
+Eigen::Matrix<T,4,1> Utils<T>::slerpQuaternion(Eigen::Matrix<T,4,1> q1, Eigen::Matrix<T,4,1> q2, T t)
 {
 
-  Eigen::Vector4f q;
+  Eigen::Matrix<T,4,1> q;
 
   // Change sign of q2 if dot product of the two quaterion is negative => allows to interpolate along the shortest path
   if(q1.dot(q2)<0.0f)
@@ -134,7 +141,7 @@ Eigen::Vector4f Utils::slerpQuaternion(Eigen::Vector4f q1, Eigen::Vector4f q2, f
     q2 = -q2;
   }
 
-  float dotProduct = q1.dot(q2);
+  T dotProduct = q1.dot(q2);
   if(dotProduct > 1.0f)
   {
     dotProduct = 1.0f;
@@ -144,7 +151,7 @@ Eigen::Vector4f Utils::slerpQuaternion(Eigen::Vector4f q1, Eigen::Vector4f q2, f
     dotProduct = -1.0f;
   }
 
-  float omega = acos(dotProduct);
+  T omega = acos(dotProduct);
 
   if(std::fabs(omega)<FLT_EPSILON)
   {
@@ -159,9 +166,10 @@ Eigen::Vector4f Utils::slerpQuaternion(Eigen::Vector4f q1, Eigen::Vector4f q2, f
 }
 
 
-float Utils::smoothRise(float x, float a, float b)
+template<typename T>
+T Utils<T>::smoothRise(T x, T a, T b)
 {
-  float y; 
+  T y; 
   if(x<a)
   {
     y = 0.0f;
@@ -179,13 +187,18 @@ float Utils::smoothRise(float x, float a, float b)
 }
 
 
-float Utils::smoothFall(float x, float a, float b)
+template<typename T>
+T Utils<T>::smoothFall(T x, T a, T b)
 {
   return 1.0f-smoothRise(x,a,b);
 }
 
 
-float Utils::smoothRiseFall(float x, float a, float b, float c, float d)
+template<typename T>
+T Utils<T>::smoothRiseFall(T x, T a, T b, T c, T d)
 {
   return smoothRise(x,a,b)*smoothFall(x,c,d);
 }
+
+template class Utils<float>;
+template class Utils<double>;
