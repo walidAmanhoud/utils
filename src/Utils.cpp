@@ -189,3 +189,15 @@ float Utils::smoothRiseFall(float x, float a, float b, float c, float d)
 {
   return smoothRise(x,a,b)*smoothFall(x,c,d);
 }
+
+float Utils::deadZone(float x, float a, float b)
+{
+  if(x < b && x > a)
+  {
+    return 0.0f;
+  }
+  else
+  {
+    return x;
+  }
+}

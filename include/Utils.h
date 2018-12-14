@@ -28,6 +28,8 @@ class Utils
 		static float smoothFall(float x, float a, float b);
 
 		static float smoothRiseFall(float x, float a, float b, float c, float d);
+
+		static float deadZone(float x, float a, float b);
 };
 
 
