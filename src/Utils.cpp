@@ -214,5 +214,19 @@ T Utils<T>::deadZone(T x, T a, T b)
   }
 }
 
+template<typename T>
+T Utils<T>::wrapToZero(T x, T a, T b)
+{
+  if(x < b && x > a)
+  {
+    return x;
+  }
+  else
+  {
+    return 0.0f;
+  }
+}
+
+
 template class Utils<float>;
 template class Utils<double>;
