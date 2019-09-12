@@ -128,6 +128,17 @@ void Utils<T>::quaternionToAxisAngle(Eigen::Matrix<T,4,1> q, Eigen::Matrix<T,3,1
   angle = 2*std::acos(q(0));
 }
 
+template<typename T>
+Eigen::Matrix<T,4,1> Utils<T>::axisAngleToQuaterion(Eigen::Matrix<T,3,1> axis, T angle)
+{
+  Eigen::Matrix<T,4,1> q;
+  q(0) = std::cos(angle/2);
+  q(1) = axis(0)*std::sin(angle/2);
+  q(2) = axis(1)*std::sin(angle/2);
+  q(3) = axis(2)*std::sin(angle/2);
+  return q;
+}
+
 
 template<typename T>
 Eigen::Matrix<T,4,1> Utils<T>::slerpQuaternion(Eigen::Matrix<T,4,1> q1, Eigen::Matrix<T,4,1> q2, T t)

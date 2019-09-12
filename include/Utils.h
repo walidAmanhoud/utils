@@ -22,6 +22,8 @@ class Utils
 
 	static void quaternionToAxisAngle(Eigen::Matrix<T,4,1> q, Eigen::Matrix<T,3,1> &axis, T &angle);
 
+	static Eigen::Matrix<T,4,1> axisAngleToQuaterion(Eigen::Matrix<T,3,1> axis, T angle);
+
   	static Eigen::Matrix<T,4,1> slerpQuaternion(Eigen::Matrix<T,4,1> q1, Eigen::Matrix<T,4,1> q2, T t);
 
   	static T smoothRise(T x, T a, T b);
