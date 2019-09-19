@@ -26,6 +26,14 @@ class Utils
 
   	static Eigen::Matrix<T,4,1> slerpQuaternion(Eigen::Matrix<T,4,1> q1, Eigen::Matrix<T,4,1> q2, T t);
 
+	static Eigen::Matrix<T,4,1> slerpQuaternion(Eigen::Matrix<T,4,1>* q, Eigen::Matrix<T,Eigen::Dynamic,1> t, int size);
+
+	static Eigen::Matrix<T,3,3> rodriguesRotation(Eigen::Matrix<T,3,1> v1, Eigen::Matrix<T,3,1> v2);
+
+	static Eigen::Matrix<T,3,1> quaternionToAngularVelocity(Eigen::Matrix<T,4,1> q1, Eigen::Matrix<T,4,1> q2, T gain = 1.0f);
+
+	static Eigen::Matrix<T,3,3> orthogonalProjector(Eigen::Matrix<T,3,1> v);
+
   	static T smoothRise(T x, T a, T b);
 
 	static T smoothFall(T x, T a, T b);

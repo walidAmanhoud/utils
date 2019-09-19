@@ -176,6 +176,80 @@ Eigen::Matrix<T,4,1> Utils<T>::slerpQuaternion(Eigen::Matrix<T,4,1> q1, Eigen::M
   return q;
 }
 
+template<typename T>
+Eigen::Matrix<T,4,1> Utils<T>::slerpQuaternion(Eigen::Matrix<T,4,1>* q, Eigen::Matrix<T,Eigen::Dynamic,1> t, int size)
+{
+
+  if(size==1)
+  {
+    return q[0];
+  }
+  else
+  {
+    T sum = 0.0f;
+    for(int k = 0; k <size; k++)
+    {
+      sum+=t(k);
+    }
+    if(sum<FLT_EPSILON)
+    {
+      return slerpQuaternion(slerpQuaternion(q,t,size-1),q[size-1],0.0f);
+    }
+    else
+    {
+      return slerpQuaternion(slerpQuaternion(q,t,size-1),q[size-1],t(size-1)/sum);
+    }
+  }
+}
+
+
+template<typename T>
+Eigen::Matrix<T,3,3> Utils<T>::rodriguesRotation(Eigen::Matrix<T,3,1> v1, Eigen::Matrix<T,3,1> v2)
+{
+  // Compute rotation error between current orientation and plane orientation using Rodrigues' law
+  v1.normalize();
+  v2.normalize();
+
+  Eigen::Matrix<T,3,1> w;
+  w = v1.cross(v2);
+  float c = v1.dot(v2);  
+  float s = w.norm();
+  w /= s;
+  
+  Eigen::Matrix<T,3,3> K;
+  K << getSkewSymmetricMatrix(w);
+
+  Eigen::Matrix<T,3,3> Re;
+  if(fabs(s)< FLT_EPSILON)
+  {
+    Re = Eigen::Matrix<T,3,3>::Identity();
+  }
+  else
+  {
+    Re = Eigen::Matrix<T,3,3>::Identity()+s*K+(1-c)*K*K;
+  }
+
+  return Re;
+}
+
+template<typename T>
+Eigen::Matrix<T,3,1> Utils<T>::quaternionToAngularVelocity(Eigen::Matrix<T,4,1> q1, Eigen::Matrix<T,4,1> q2, T gain)
+{
+  Eigen::Matrix<T,4,1> q1I, wq;
+  q1I(0) = q1(0);
+  q1I.segment(1,3) = -q1.segment(1,3);
+  wq = 2.0f*gain*quaternionProduct(q2-q1,q1I);
+  
+  return wq.segment(1,3);
+}
+
+
+template<typename T>
+Eigen::Matrix<T,3,3> Utils<T>::orthogonalProjector(Eigen::Matrix<T,3,1> v)
+{ 
+  return Eigen::Matrix<T,3,3>::Identity()-v*v.transpose();
+}
+
 
 template<typename T>
 T Utils<T>::smoothRise(T x, T a, T b)
