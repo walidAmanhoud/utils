@@ -313,5 +313,86 @@ T Utils<T>::wrapToZero(T x, T a, T b)
 }
 
 
+template<typename T>
+T Utils<T>::bound(T x, T a, T b)
+{
+  if(x > b)
+  {
+    return b;
+  }
+  else if(x<a)
+  {
+    return a;
+  }
+  else
+  {
+    return x;
+  }
+}
+
+
+template<typename T>
+Eigen::Matrix<T,Eigen::Dynamic,1> Utils<T>::bound(Eigen::Matrix<T,Eigen::Dynamic,1> x, T limit)
+{
+  T norm = x.norm();
+
+  if(norm>limit)
+  {
+    return x*limit/norm;
+  }
+  else
+  {
+    return x;
+  }
+}
+
+
+template<typename T>
+Eigen::Matrix<T,4,4> Utils<T>::getDHMatrix(T a, T alpha, T d, T theta)
+{
+  Eigen::Matrix<T,4,4> H;
+  H(0,0) = std::cos(theta);
+  H(0,1) = -std::cos(alpha)*std::sin(theta);
+  H(0,2) = std::sin(alpha)*std::sin(theta);
+  H(0,3) = a*std::cos(theta);
+
+  H(1,0) = std::sin(theta);
+  H(1,1) = std::cos(alpha)*std::cos(theta);
+  H(1,2) = -std::sin(alpha)*std::cos(theta);
+  H(1,3) = a*std::sin(theta);
+
+  H(2,0) = 0.0f;
+  H(2,1) = std::sin(alpha);
+  H(2,2) = std::cos(alpha);
+  H(2,3) = d;
+
+  H(3,0) = 0.0f;
+  H(3,1) = 0.0f;
+  H(3,2) = 0.0f;
+  H(3,3) = 1.0f;
+
+  return H;
+}
+
+
+template<typename T>
+Eigen::Matrix<T,4,4> Utils<T>::getForwardKinematics(Eigen::Matrix<T,7,1> joints)
+{
+  Eigen::Matrix<T,4,4> H, H1, H2, H3, H4, H5, H6, H7;
+
+  H1 = getDHMatrix(0.0f,M_PI/2.0f,0.3105f,joints(0));
+  H2 = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(1));
+  H3 = getDHMatrix(0.0f,-M_PI/2.0f,0.4f,joints(2));
+  H4 = getDHMatrix(0.0f,M_PI/2.0f,0.0f,joints(3));
+  H5 = getDHMatrix(0.0f,M_PI/2.0f,0.39f,joints(4));
+  H6 = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(5));
+  H7 = getDHMatrix(0.0f,0.0f,0.078f,joints(6));
+
+  H = H1*H2*H3*H4*H5*H6*H7;
+
+  return H;
+}
+
+
 template class Utils<float>;
 template class Utils<double>;

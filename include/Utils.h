@@ -42,7 +42,16 @@ class Utils
 
 	static T deadZone(T x, T a, T b);		
 
-	static T wrapToZero(T x, T a, T b);		
+	static T wrapToZero(T x, T a, T b);	
+
+	static T bound(T x, T a, T b);
+
+	static Eigen::Matrix<T,Eigen::Dynamic,1> bound(Eigen::Matrix<T,Eigen::Dynamic,1> x, T limit);
+
+	static Eigen::Matrix<T,4,4> getDHMatrix(T a, T alpha, T d, T theta);
+
+	static Eigen::Matrix<T,4,4> getForwardKinematics(Eigen::Matrix<T,7,1> joints);
+
 };
 
 #endif
