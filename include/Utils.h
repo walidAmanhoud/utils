@@ -16,6 +16,8 @@ class Utils
 
     static Eigen::Matrix<T,3,3> getSkewSymmetricMatrix(Eigen::Matrix<T,3,1> input);
 
+    static Eigen::Matrix<T,3,3> eulerAnglesToRotationMatrix(T phi, T theta, T psi);
+
     static Eigen::Matrix<T,4,1> rotationMatrixToQuaternion(Eigen::Matrix<T,3,3> R);
 
   	static Eigen::Matrix<T,3,3> quaternionToRotationMatrix(Eigen::Matrix<T,4,1> q);

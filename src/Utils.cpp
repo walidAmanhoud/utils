@@ -34,6 +34,26 @@ Eigen::Matrix<T,3,3> Utils<T>::getSkewSymmetricMatrix(Eigen::Matrix<T,3,1> input
 
 
 template<typename T>
+Eigen::Matrix<T,3,3> Utils<T>::eulerAnglesToRotationMatrix(T phi, T theta, T psi)
+{
+  T cphi = std::cos(phi);
+  T sphi = std::sin(phi);
+  T ctheta = std::cos(theta);
+  T stheta = std::sin(theta);
+  T cpsi = std::cos(psi);
+  T spsi = std::sin(psi);
+
+
+  Eigen::Matrix<T,3,3> R;
+  R << cpsi*ctheta, cpsi*stheta*sphi-spsi*cphi, cpsi*stheta*cphi+spsi*sphi,
+       spsi*ctheta, spsi*stheta*sphi+cpsi*cphi, spsi*stheta*cphi-cpsi*sphi,
+       -stheta, ctheta*sphi, ctheta*cphi;
+
+  return R;
+}
+
+
+template<typename T>
 Eigen::Matrix<T,4,1> Utils<T>::rotationMatrixToQuaternion(Eigen::Matrix<T,3,3> R)
 {
   Eigen::Matrix<T,4,1> q;
