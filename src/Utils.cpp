@@ -319,6 +319,23 @@ T Utils<T>::deadZone(T x, T a, T b)
   }
 }
 
+
+template<typename T>
+Eigen::Matrix<T,Eigen::Dynamic,1> Utils<T>::deadZone(Eigen::Matrix<T,Eigen::Dynamic,1> x, T limit)
+{
+  T norm = x.norm();
+
+  if(norm>limit)
+  {
+    return x;
+  }
+  else
+  {
+    return Eigen::Matrix<T,Eigen::Dynamic,1>::Zero(x.size());
+  }
+}
+
+
 template<typename T>
 T Utils<T>::wrapToZero(T x, T a, T b)
 {
@@ -411,6 +428,48 @@ Eigen::Matrix<T,4,4> Utils<T>::getForwardKinematics(Eigen::Matrix<T,7,1> joints)
   H = H1*H2*H3*H4*H5*H6*H7;
 
   return H;
+}
+
+
+template<typename T>
+Eigen::Matrix<T,6,7> Utils<T>::getGeometricJacobian(Eigen::Matrix<T,7,1> joints, Eigen::Matrix<T,3,1> rEEx)
+{
+  Eigen::Matrix<T,4,4> Hee, H[7], Hk;
+  Eigen::Matrix<T,6,7> J;
+
+  H[0] = getDHMatrix(0.0f,M_PI/2.0f,0.3105f,joints(0));
+  H[1] = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(1));
+  H[2] = getDHMatrix(0.0f,-M_PI/2.0f,0.4f,joints(2));
+  H[3] = getDHMatrix(0.0f,M_PI/2.0f,0.0f,joints(3));
+  H[4] = getDHMatrix(0.0f,M_PI/2.0f,0.39f,joints(4));
+  H[5] = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(5));
+  H[6] = getDHMatrix(0.0f,0.0f,0.078f,joints(6));
+
+  Eigen::Matrix<T,3,1> xEE, z0, x0, xk, zk;
+
+  Hee = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6];
+  xEE = Hee.block(0,3,3,1);
+
+  Hk.setIdentity();
+  J.setConstant(0.0f);
+
+
+
+  for(int k = 0; k < 7; k++)
+  {
+
+    xk = Hk.block(0,3,3,1);
+    zk = Hk.block(0,2,3,1);
+
+    J.block(0,k,3,1) = zk.cross(xEE-xk);
+    J.block(3,k,3,1) = zk;
+    Hk = Hk*H[k];
+  }
+
+  J.block(0,0,3,7) += -getSkewSymmetricMatrix(rEEx)*J.block(3,0,3,7); 
+
+  return J;
+
 }
 
 

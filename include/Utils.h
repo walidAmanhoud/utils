@@ -42,7 +42,10 @@ class Utils
 
 	static T smoothRiseFall(T x, T a, T b, T c, T d);
 
-	static T deadZone(T x, T a, T b);		
+	static T deadZone(T x, T a, T b);
+
+	static Eigen::Matrix<T,Eigen::Dynamic,1> deadZone(Eigen::Matrix<T,Eigen::Dynamic,1> x, T limit);
+
 
 	static T wrapToZero(T x, T a, T b);	
 
@@ -53,6 +56,9 @@ class Utils
 	static Eigen::Matrix<T,4,4> getDHMatrix(T a, T alpha, T d, T theta);
 
 	static Eigen::Matrix<T,4,4> getForwardKinematics(Eigen::Matrix<T,7,1> joints);
+
+
+	static Eigen::Matrix<T,6,7> getGeometricJacobian(Eigen::Matrix<T,7,1> joints, Eigen::Matrix<T,3,1> rEEx = Eigen::Matrix<T,3,1>::Zero());
 
 };
 

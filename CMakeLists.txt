@@ -28,5 +28,11 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 FILE(GLOB SRCS src/Utils.cpp)
 FILE(GLOB INCS include/Utils.h)
 
+
 add_library(${PROJECT_NAME} ${SRCS} ${INCS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
+
+add_executable(test_utils src/test_utils.cpp)
+target_link_libraries(test_utils ${catkin_LIBRARIES} ${PROJECT_NAME})
+add_dependencies(test_utils ${PROJECT_NAME}_gencpp)
