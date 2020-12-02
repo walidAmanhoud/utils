@@ -385,72 +385,148 @@ Eigen::Matrix<T,Eigen::Dynamic,1> Utils<T>::bound(Eigen::Matrix<T,Eigen::Dynamic
 
 
 template<typename T>
-Eigen::Matrix<T,4,4> Utils<T>::getDHMatrix(T a, T alpha, T d, T theta)
+Eigen::Matrix<T,4,4> Utils<T>::getDHMatrix(T a, T alpha, T d, T theta, DH_CONVENTION dhConvention)
 {
   Eigen::Matrix<T,4,4> H;
-  H(0,0) = std::cos(theta);
-  H(0,1) = -std::cos(alpha)*std::sin(theta);
-  H(0,2) = std::sin(alpha)*std::sin(theta);
-  H(0,3) = a*std::cos(theta);
 
-  H(1,0) = std::sin(theta);
-  H(1,1) = std::cos(alpha)*std::cos(theta);
-  H(1,2) = -std::sin(alpha)*std::cos(theta);
-  H(1,3) = a*std::sin(theta);
+  if(dhConvention == NORMAL)
+  {
+    H(0,0) = std::cos(theta);
+    H(0,1) = -std::cos(alpha)*std::sin(theta);
+    H(0,2) = std::sin(alpha)*std::sin(theta);
+    H(0,3) = a*std::cos(theta);
 
-  H(2,0) = 0.0f;
-  H(2,1) = std::sin(alpha);
-  H(2,2) = std::cos(alpha);
-  H(2,3) = d;
+    H(1,0) = std::sin(theta);
+    H(1,1) = std::cos(alpha)*std::cos(theta);
+    H(1,2) = -std::sin(alpha)*std::cos(theta);
+    H(1,3) = a*std::sin(theta);
 
-  H(3,0) = 0.0f;
-  H(3,1) = 0.0f;
-  H(3,2) = 0.0f;
-  H(3,3) = 1.0f;
+    H(2,0) = 0.0f;
+    H(2,1) = std::sin(alpha);
+    H(2,2) = std::cos(alpha);
+    H(2,3) = d;
+
+    H(3,0) = 0.0f;
+    H(3,1) = 0.0f;
+    H(3,2) = 0.0f;
+    H(3,3) = 1.0f;
+  }
+  else
+  {
+    H(0,0) = std::cos(theta);
+    H(0,1) = -std::sin(theta);
+    H(0,2) = 0.0f;
+    H(0,3) = a;
+
+    H(1,0) = std::sin(theta)*std::cos(alpha);
+    H(1,1) = std::cos(theta)*std::cos(alpha);
+    H(1,2) = -std::sin(alpha);
+    H(1,3) = -d*std::sin(alpha);
+
+    H(2,0) = std::sin(theta)*std::sin(alpha);
+    H(2,1) = std::cos(theta)*std::sin(alpha);
+    H(2,2) = std::cos(alpha);
+    H(2,3) = d*std::cos(alpha);
+
+    H(3,0) = 0.0f;
+    H(3,1) = 0.0f;
+    H(3,2) = 0.0f;
+    H(3,3) = 1.0f;
+  }
 
   return H;
 }
 
 
 template<typename T>
-Eigen::Matrix<T,4,4> Utils<T>::getForwardKinematics(Eigen::Matrix<T,7,1> joints)
+Eigen::Matrix<T,4,4> Utils<T>::getForwardKinematics(Eigen::Matrix<T,7,1> joints, ROBOT_ID robotID)
 {
-  Eigen::Matrix<T,4,4> H, H1, H2, H3, H4, H5, H6, H7;
+  Eigen::Matrix<T,4,4> H, H1, H2, H3, H4, H5, H6, H7, H8;
 
-  H1 = getDHMatrix(0.0f,M_PI/2.0f,0.3105f,joints(0));
-  H2 = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(1));
-  H3 = getDHMatrix(0.0f,-M_PI/2.0f,0.4f,joints(2));
-  H4 = getDHMatrix(0.0f,M_PI/2.0f,0.0f,joints(3));
-  H5 = getDHMatrix(0.0f,M_PI/2.0f,0.39f,joints(4));
-  H6 = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(5));
-  H7 = getDHMatrix(0.0f,0.0f,0.078f,joints(6));
-
-  H = H1*H2*H3*H4*H5*H6*H7;
+  if(robotID==KUKA_LWR)
+  {
+    H1 = getDHMatrix(0.0f,M_PI/2.0f,0.3105f,joints(0));
+    H2 = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(1));
+    H3 = getDHMatrix(0.0f,-M_PI/2.0f,0.4f,joints(2));
+    H4 = getDHMatrix(0.0f,M_PI/2.0f,0.0f,joints(3));
+    H5 = getDHMatrix(0.0f,M_PI/2.0f,0.39f,joints(4));
+    H6 = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(5));
+    H7 = getDHMatrix(0.0f,0.0f,0.078f,joints(6));    
+    H = H1*H2*H3*H4*H5*H6*H7;
+  }
+  else if(robotID==FRANKA_PANDA)
+  {
+    H1 = getDHMatrix(0.0f,0.0f,0.333f,joints(0),MODIFIED);
+    H2 = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(1),MODIFIED);
+    H3 = getDHMatrix(0.0f,M_PI/2.0f,0.316f,joints(2),MODIFIED);
+    H4 = getDHMatrix(0.0825f,M_PI/2.0f,0.0f,joints(3),MODIFIED);
+    H5 = getDHMatrix(-0.0825f,-M_PI/2.0f,0.384f,joints(4),MODIFIED);
+    H6 = getDHMatrix(0.0f,M_PI/2.0f,0.0f,joints(5),MODIFIED);
+    H7 = getDHMatrix(0.088f,M_PI/2.0f,0.0f,joints(6),MODIFIED);  
+    H8 = getDHMatrix(0.0f,0.0f,0.107f,0.0f,MODIFIED); 
+    H = H1*H2*H3*H4*H5*H6*H7*H8;
+  }
 
   return H;
 }
 
 
 template<typename T>
-Eigen::Matrix<T,6,7> Utils<T>::getGeometricJacobian(Eigen::Matrix<T,7,1> joints, Eigen::Matrix<T,3,1> rEEx)
+Eigen::Matrix<T,6,7> Utils<T>::getGeometricJacobian(Eigen::Matrix<T,7,1> joints, Eigen::Matrix<T,3,1> rEEx, ROBOT_ID robotID)
 {
-  Eigen::Matrix<T,4,4> Hee, H[7], Hk;
+  Eigen::Matrix<T,4,4> Hee, H[8], Hk;
   Eigen::Matrix<T,6,7> J;
 
-  H[0] = getDHMatrix(0.0f,M_PI/2.0f,0.3105f,joints(0));
-  H[1] = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(1));
-  H[2] = getDHMatrix(0.0f,-M_PI/2.0f,0.4f,joints(2));
-  H[3] = getDHMatrix(0.0f,M_PI/2.0f,0.0f,joints(3));
-  H[4] = getDHMatrix(0.0f,M_PI/2.0f,0.39f,joints(4));
-  H[5] = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(5));
-  H[6] = getDHMatrix(0.0f,0.0f,0.078f,joints(6));
+  DH_CONVENTION convention;
+  if(robotID == KUKA_LWR)
+  {
+    convention = NORMAL;
+  }
+  else if(robotID = FRANKA_PANDA)
+  {
+    convention = MODIFIED;
+  }
+
+  if(robotID == KUKA_LWR)
+  {  
+    H[0] = getDHMatrix(0.0f,M_PI/2.0f,0.3105f,joints(0));
+    H[1] = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(1));
+    H[2] = getDHMatrix(0.0f,-M_PI/2.0f,0.4f,joints(2));
+    H[3] = getDHMatrix(0.0f,M_PI/2.0f,0.0f,joints(3));
+    H[4] = getDHMatrix(0.0f,M_PI/2.0f,0.39f,joints(4));
+    H[5] = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(5));
+    H[6] = getDHMatrix(0.0f,0.0f,0.078f,joints(6));
+    Hee = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6];
+  }
+  else if(robotID == FRANKA_PANDA)
+  {
+    H[0] = getDHMatrix(0.0f,0.0f,0.333f,joints(0),convention);
+    H[1] = getDHMatrix(0.0f,-M_PI/2.0f,0.0f,joints(1),convention);
+    H[2] = getDHMatrix(0.0f,M_PI/2.0f,0.316f,joints(2),convention);
+    H[3] = getDHMatrix(0.0825f,M_PI/2.0f,0.0f,joints(3),convention);
+    H[4] = getDHMatrix(-0.0825f,-M_PI/2.0f,0.384f,joints(4),convention);
+    H[5] = getDHMatrix(0.0f,M_PI/2.0f,0.0f,joints(5),convention);
+    H[6] = getDHMatrix(0.088f,M_PI/2.0f,0.107f,joints(6),convention);  
+    // H[7] = getDHMatrix(0.0f,0.0f,0.107f,0.0f,MODIFIED); 
+    Hee = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6];
+  }
+
+  // std::cerr << H[0] << std::endl << std::endl;
+  // std::cerr << H[0]*H[1] << std::endl << std::endl;
+  // std::cerr << H[0]*H[1]*H[2] << std::endl << std::endl;
+  // std::cerr << H[0]*H[1]*H[2]*H[3] << std::endl << std::endl;
+  // std::cerr << H[0]*H[1]*H[2]*H[3]*H[4] << std::endl << std::endl;
+  // std::cerr << H[0]*H[1]*H[2]*H[3]*H[4]*H[5] << std::endl << std::endl;
+  // std::cerr << H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6] << std::endl << std::endl;
 
   Eigen::Matrix<T,3,1> xEE, z0, x0, xk, zk;
 
-  Hee = H[0]*H[1]*H[2]*H[3]*H[4]*H[5]*H[6];
   xEE = Hee.block(0,3,3,1);
 
+
+
   Hk.setIdentity();
+
   J.setConstant(0.0f);
 
 
@@ -458,12 +534,19 @@ Eigen::Matrix<T,6,7> Utils<T>::getGeometricJacobian(Eigen::Matrix<T,7,1> joints,
   for(int k = 0; k < 7; k++)
   {
 
+    if(convention==MODIFIED)
+    {
+      Hk = Hk*H[k];
+    }
     xk = Hk.block(0,3,3,1);
     zk = Hk.block(0,2,3,1);
 
     J.block(0,k,3,1) = zk.cross(xEE-xk);
     J.block(3,k,3,1) = zk;
-    Hk = Hk*H[k];
+    if(convention == NORMAL)
+    {
+      Hk = Hk*H[k];
+    }
   }
 
   J.block(0,0,3,7) += -getSkewSymmetricMatrix(rEEx)*J.block(3,0,3,7); 
